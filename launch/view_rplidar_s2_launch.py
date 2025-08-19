@@ -71,7 +71,7 @@ def generate_launch_description():
                          'frame_id': frame_id,
                          'inverted': inverted,
                          'angle_compensate': angle_compensate,
-                           'scan_mode': scan_mode
+                         'scan_mode': scan_mode
                          }],
             output='screen'),
 
@@ -82,4 +82,3 @@ def generate_launch_description():
             arguments=['-d', rviz_config_dir],
             output='screen'),
     ])
-

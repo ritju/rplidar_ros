@@ -12,17 +12,14 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     channel_type =  LaunchConfiguration('channel_type', default='serial')
-    serial_port = LaunchConfiguration('serial_port', default='/dev/ttyUSB0')
-    serial_baudrate = LaunchConfiguration('serial_baudrate', default='256000') #for A3 is 256000
-    frame_id = LaunchConfiguration('frame_id', default='laser')
+    front_serial_port = LaunchConfiguration('serial_port', default='/dev/front_rplidar')
+    back_serial_port = LaunchConfiguration('serial_port', default='/dev/back_rplidar')
+    serial_baudrate = LaunchConfiguration('serial_baudrate', default='1000000') #for s2 is 1000000
+    front_frame_id = LaunchConfiguration('frame_id', default='front_rplidar')
+    back_frame_id = LaunchConfiguration('frame_id', default='back_rplidar')
     inverted = LaunchConfiguration('inverted', default='false')
     angle_compensate = LaunchConfiguration('angle_compensate', default='true')
-    scan_mode = LaunchConfiguration('scan_mode', default='Sensitivity')
-
-    rviz_config_dir = os.path.join(
-            get_package_share_directory('rplidar_ros'),
-            'rviz',
-            'rplidar_ros.rviz')
+    scan_mode = LaunchConfiguration('scan_mode', default='DenseBoost')
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -31,8 +28,13 @@ def generate_launch_description():
             description='Specifying channel type of lidar'),
 
         DeclareLaunchArgument(
-            'serial_port',
-            default_value=serial_port,
+            'front_serial_port',
+            default_value=front_serial_port,
+            description='Specifying usb port to connected lidar'),
+
+        DeclareLaunchArgument(
+            'back_serial_port',
+            default_value=back_serial_port,
             description='Specifying usb port to connected lidar'),
 
         DeclareLaunchArgument(
@@ -41,8 +43,13 @@ def generate_launch_description():
             description='Specifying usb port baudrate to connected lidar'),
         
         DeclareLaunchArgument(
-            'frame_id',
-            default_value=frame_id,
+            'front_frame_id',
+            default_value=front_frame_id,
+            description='Specifying frame_id of lidar'),
+        
+        DeclareLaunchArgument(
+            'back_frame_id',
+            default_value=back_frame_id,
             description='Specifying frame_id of lidar'),
 
         DeclareLaunchArgument(
@@ -63,21 +70,33 @@ def generate_launch_description():
         Node(
             package='rplidar_ros',
             executable='rplidar_node',
-            name='rplidar_node',
+            name='front_rplidar_node',
             parameters=[{'channel_type':channel_type,
-                         'serial_port': serial_port,
+                         'serial_port': front_serial_port,
                          'serial_baudrate': serial_baudrate,
-                         'frame_id': frame_id,
+                         'frame_id': front_frame_id,
                          'inverted': inverted,
                          'angle_compensate': angle_compensate,
-                         'scan_mode': scan_mode}],
+                         'scan_mode': scan_mode
+                         }],
+            respawn=True,
+            respawn_delay=5.0,
             output='screen'),
-
+        
         Node(
-            package='rviz2',
-            executable='rviz2',
-            name='rviz2',
-            arguments=['-d', rviz_config_dir],
+            package='rplidar_ros',
+            executable='rplidar_node',
+            name='back_rplidar_node',
+            parameters=[{'channel_type':channel_type,
+                         'serial_port': back_serial_port,
+                         'serial_baudrate': serial_baudrate,
+                         'frame_id': back_frame_id,
+                         'inverted': inverted,
+                         'angle_compensate': angle_compensate,
+                         'scan_mode': scan_mode
+                         }],
+            respawn=True,
+            respawn_delay=5.0,
             output='screen'),
     ])
 

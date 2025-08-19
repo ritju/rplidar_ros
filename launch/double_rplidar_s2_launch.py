@@ -12,14 +12,16 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     channel_type =  LaunchConfiguration('channel_type', default='serial')
-    front_serial_port = LaunchConfiguration('serial_port', default='/dev/front_rplidar')
-    back_serial_port = LaunchConfiguration('serial_port', default='/dev/back_rplidar')
+    front_serial_port = LaunchConfiguration('front_serial_port', default='/dev/front_rplidar')
+    back_serial_port = LaunchConfiguration('back_serial_port', default='/dev/back_rplidar')
     serial_baudrate = LaunchConfiguration('serial_baudrate', default='1000000') #for s2 is 1000000
-    front_frame_id = LaunchConfiguration('frame_id', default='front_rplidar')
-    back_frame_id = LaunchConfiguration('frame_id', default='back_rplidar')
+    front_frame_id = LaunchConfiguration('front_frame_id', default='front_rplidar')
+    back_frame_id = LaunchConfiguration('back_frame_id', default='back_rplidar')
     inverted = LaunchConfiguration('inverted', default='false')
     angle_compensate = LaunchConfiguration('angle_compensate', default='true')
     scan_mode = LaunchConfiguration('scan_mode', default='DenseBoost')
+    front_scan_topic = LaunchConfiguration('front_scan_topic', default='front_scan')
+    back_scan_topic = LaunchConfiguration('back_scan_topic', default='back_scan')
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -66,6 +68,16 @@ def generate_launch_description():
             'scan_mode',
             default_value=scan_mode,
             description='Specifying scan mode of lidar'),
+        
+        DeclareLaunchArgument(
+            'front_scan_topic',
+            default_value=front_scan_topic,
+            description='Specifying scan mode of lidar'),
+        
+        DeclareLaunchArgument(
+            'back_scan_topic',
+            default_value=back_scan_topic,
+            description='Specifying scan mode of lidar'),
 
         Node(
             package='rplidar_ros',
@@ -77,7 +89,8 @@ def generate_launch_description():
                          'frame_id': front_frame_id,
                          'inverted': inverted,
                          'angle_compensate': angle_compensate,
-                         'scan_mode': scan_mode
+                         'scan_mode': scan_mode,
+                         'topic_name': front_scan_topic
                          }],
             respawn=True,
             respawn_delay=5.0,
@@ -93,7 +106,8 @@ def generate_launch_description():
                          'frame_id': back_frame_id,
                          'inverted': inverted,
                          'angle_compensate': angle_compensate,
-                         'scan_mode': scan_mode
+                         'scan_mode': scan_mode,
+                         'topic_name': back_scan_topic
                          }],
             respawn=True,
             respawn_delay=5.0,

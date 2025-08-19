@@ -90,7 +90,9 @@ def generate_launch_description():
                          'inverted': inverted,
                          'angle_compensate': angle_compensate,
                          'scan_mode': scan_mode,
-                         'topic_name': front_scan_topic
+                         'topic_name': front_scan_topic,
+                         'negative_angle_cut_val': -0.85,
+                         'positive_angle_cut_val': 0.85
                          }],
             respawn=True,
             respawn_delay=5.0,
@@ -107,7 +109,9 @@ def generate_launch_description():
                          'inverted': inverted,
                          'angle_compensate': angle_compensate,
                          'scan_mode': scan_mode,
-                         'topic_name': back_scan_topic
+                         'topic_name': back_scan_topic,
+                         'negative_angle_cut_val': -0.85,
+                         'positive_angle_cut_val': 0.85
                          }],
             respawn=True,
             respawn_delay=5.0,

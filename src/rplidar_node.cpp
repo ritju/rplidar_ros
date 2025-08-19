@@ -280,8 +280,8 @@ class RPlidarNode : public rclcpp::Node
             }
             if (negative_angle_cut_val_ <= 0.0 && positive_angle_cut_val_ >= 0.0)
             {
-                if (apply_index * scan_msg->angle_increment > negative_angle_cut_val_ && (apply_index * scan_msg->angle_increment < 0) ||
-                    apply_index * scan_msg->angle_increment < positive_angle_cut_val_ && (apply_index * scan_msg->angle_increment > 0))
+                if ((scan_msg->angle_min + apply_index * scan_msg->angle_increment > negative_angle_cut_val_ && scan_msg->angle_min + apply_index * scan_msg->angle_increment < 0) ||
+                    (scan_msg->angle_min + apply_index * scan_msg->angle_increment < positive_angle_cut_val_ && scan_msg->angle_min + apply_index * scan_msg->angle_increment > 0))
                 {
                     read_value = std::numeric_limits<float>::infinity();
                 }

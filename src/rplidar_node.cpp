@@ -62,7 +62,7 @@ class RPlidarNode : public rclcpp::Node
 {
   public:
     RPlidarNode(const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
-    : Node("rplidar_node", options)
+    : Node("rplidar_node", options), negative_angle_cut_val_(0.0), positive_angle_cut_val_(0.0)
     {
 
       
@@ -86,6 +86,8 @@ class RPlidarNode : public rclcpp::Node
         this->declare_parameter<std::string>("topic_name",std::string("scan"));
         this->declare_parameter<std::string>("scan_mode",std::string());
         this->declare_parameter<float>("scan_frequency",10);
+        this->declare_parameter<double>("negative_angle_cut_val",0.0);
+        this->declare_parameter<double>("positive_angle_cut_val",0.0);
         
         this->get_parameter_or<std::string>("channel_type", channel_type, "serial");
         this->get_parameter_or<std::string>("tcp_ip", tcp_ip, "192.168.0.7"); 
@@ -101,6 +103,8 @@ class RPlidarNode : public rclcpp::Node
         this->get_parameter_or<bool>("auto_standby", auto_standby, false);
         this->get_parameter_or<std::string>("topic_name", topic_name, "scan");
         this->get_parameter_or<std::string>("scan_mode", scan_mode, std::string());
+        this->get_parameter_or<double>("negative_angle_cut_val", negative_angle_cut_val_, 0.0);
+        this->get_parameter_or<double>("positive_angle_cut_val", positive_angle_cut_val_, 0.0);
         if(channel_type == "udp")
             this->get_parameter_or<float>("scan_frequency", scan_frequency, 20.0);
         else
@@ -274,11 +278,25 @@ class RPlidarNode : public rclcpp::Node
                 else
                     apply_index = apply_index + scan_midpoint;
             }
-
-            if (read_value == 0.0)
-                scan_msg->ranges[apply_index] = std::numeric_limits<float>::infinity();
+            if (negative_angle_cut_val_ <= 0.0 && positive_angle_cut_val_ >= 0.0)
+            {
+                if (apply_index * scan_msg->angle_increment > negative_angle_cut_val_ && (apply_index * scan_msg->angle_increment < 0) ||
+                    apply_index * scan_msg->angle_increment < positive_angle_cut_val_ && (apply_index * scan_msg->angle_increment > 0))
+                {
+                    read_value = std::numeric_limits<float>::infinity();
+                }
+                else if (read_value == 0.0)
+                    scan_msg->ranges[apply_index] = std::numeric_limits<float>::infinity();
+                else
+                    scan_msg->ranges[apply_index] = read_value;
+            }
             else
-                scan_msg->ranges[apply_index] = read_value;
+            {
+                if (read_value == 0.0)
+                    scan_msg->ranges[apply_index] = std::numeric_limits<float>::infinity();
+                else
+                    scan_msg->ranges[apply_index] = read_value;
+            }
             scan_msg->intensities[apply_index] = (float)(nodes[apply_index].quality >> 2);
         }
 
@@ -577,6 +595,7 @@ public:
     bool is_scanning = false;
 
     ILidarDriver *drv = nullptr;
+    double negative_angle_cut_val_, positive_angle_cut_val_;
 };
 
 void ExitHandler(int sig)

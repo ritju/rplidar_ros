@@ -111,7 +111,7 @@ def generate_launch_description():
                          'scan_mode': scan_mode,
                          'topic_name': back_scan_topic,
                          'negative_angle_cut_val': -0.85,
-                         'positive_angle_cut_val': 0.85
+                         'positive_angle_cut_val': 0.9
                          }],
             respawn=True,
             respawn_delay=5.0,
